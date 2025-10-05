@@ -18,7 +18,7 @@ const getBaseURL = () => {
 };
 
 const api = axios.create({
-  baseURL: "http://localhost:5000/api",
+  baseURL: "http://172.20.10.3:5000/api",
   withCredentials: true, // 🔑 важно! чтобы refreshToken по куки ходил
   headers: {
     "Content-Type": "application/json",

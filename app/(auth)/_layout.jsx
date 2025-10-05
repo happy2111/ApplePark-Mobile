@@ -1,17 +1,16 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
 import {authStore} from "../../store/AuthStore";
 import {Redirect, Stack} from "expo-router";
 
 const AuthRoutesLayout = () => {
-  if (authStore.isAuth) return <Redirect href={"/"} />;
+  // Избегаем ререндер-петли: если идет загрузка/гидратация стора — не редиректим
+  if (authStore.isAuth === true) return <Redirect href={"/"} />;
 
   return (
     <Stack
-      screenOption={{headerShown: false}}
+      screenOptions={{ headerShown: false }}
     />
   );
 };
-
 
 export default AuthRoutesLayout;

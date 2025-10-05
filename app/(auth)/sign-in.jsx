@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -20,85 +20,80 @@ const LoginScreen = observer(() => {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const [isFilled, setIsFilled] = useState(false);
+
+  useEffect(() => {
+    const valid = login.trim().length > 2 && password.trim().length >= 6;
+    setIsFilled(valid);
+  }, [login, password]);
 
   const handleSignIn = async () => {
     if (!login || !password) {
-      Alert.alert("Error", "Please fill in all fields");
+      Alert.alert("Xatolik", "Iltimos, barcha maydonlarni to‘ldiring");
       return;
     }
 
     try {
       await authStore.login(login, password);
-      Alert.alert("Success", "You have successfully logged in!");
+      Alert.alert("Muvaffaqiyatli", "Tizimga muvaffaqiyatli kirdingiz!");
       router.replace("/");
     } catch (err) {
       Alert.alert(
-        "Login Failed",
-        err.response?.data?.message || "Invalid credentials"
+        "Kirish amalga oshmadi",
+        err.response?.data?.message || "Login yoki parol noto‘g‘ri"
       );
     }
   };
 
   return (
     <KeyboardAvoidingView
+      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
-      className="flex-1 bg-white"
+      className="flex-1 bg-background"
     >
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ flexGrow: 1 }}
-      >
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View className="flex-1 px-6 pt-16">
-          {/* Back Button */}
-          <TouchableOpacity
-            onPress={() => router.back()}
-            className="mb-8"
-          >
+          <TouchableOpacity onPress={() => router.replace("/")} className="mb-8">
             <Ionicons name="chevron-back" size={28} color="#000" />
           </TouchableOpacity>
 
-          {/* Header */}
           <View className="mb-10">
-            <Text className="text-3xl font-bold text-gray-900 mb-2">
-              Welcome back to
+            <Text className="text-3xl font-bold text-secondary mb-2">
+              Apple Park’ga
             </Text>
-            <Text className="text-3xl font-bold text-gray-900 mb-4">
-              Mega Mall
+            <Text className="text-3xl font-bold text-secondary mb-4">
+              Xush kelibsiz!
             </Text>
             <Text className="text-gray-500 text-base">
-              Silahkan masukan data untuk login
+              Tizimga kirish uchun ma’lumotlaringizni kiriting
             </Text>
           </View>
 
-          {/* Email/Phone Input */}
           <View className="mb-6">
-            <Text className="text-gray-900 font-medium mb-2">
-              Email/ Phone
+            <Text className="text-secondary font-medium mb-2">
+              Email yoki Telefon
             </Text>
             <TextInput
               value={login}
               onChangeText={setLogin}
-              placeholder="Masukan Alamat Email/ No Telepon Anda"
+              placeholder="Email yoki telefon raqamingiz"
               placeholderTextColor="#9CA3AF"
               keyboardType="email-address"
               autoCapitalize="none"
-              className="bg-gray-50 rounded-xl px-4 py-4 text-base text-gray-900"
+              className="bg-background-muted rounded-xl px-4 py-4 text-base text-secondary border border-border"
             />
           </View>
 
-          {/* Password Input */}
           <View className="mb-8">
-            <Text className="text-gray-900 font-medium mb-2">
-              Password
-            </Text>
+            <Text className="text-secondary font-medium mb-2">Parol</Text>
             <View className="relative">
               <TextInput
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Masukan Kata Sandi Akun"
+                placeholder="Parolingizni kiriting"
                 placeholderTextColor="#9CA3AF"
                 secureTextEntry={!showPassword}
-                className="bg-gray-50 rounded-xl px-4 py-4 pr-12 text-base text-gray-900"
+                className="bg-background-muted rounded-xl px-4 py-4 pr-12 text-base text-secondary border border-border"
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -113,32 +108,36 @@ const LoginScreen = observer(() => {
             </View>
           </View>
 
-          {/* Sign In Button */}
           <TouchableOpacity
             onPress={handleSignIn}
-            disabled={authStore.loading}
+            disabled={authStore.loading || !isFilled}
             activeOpacity={0.8}
-            className="bg-gray-300 rounded-xl py-4 mb-6"
+            className={`rounded-xl py-4 mb-6 ${
+              isFilled ? "bg-primary" : "bg-gray-300"
+            }`}
           >
             {authStore.loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text className="text-center text-gray-600 text-base font-semibold">
-                Sign In
+              <Text
+                className={`text-center text-base font-semibold ${
+                  isFilled ? "text-white" : "text-gray-600"
+                }`}
+              >
+                Tizimga kirish
               </Text>
             )}
           </TouchableOpacity>
 
-          {/* Footer */}
           <View className="flex-row justify-between items-center">
             <TouchableOpacity onPress={() => router.push("/forgot-password")}>
-              <Text className="text-gray-900 text-base font-medium">
-                Forgot Password
+              <Text className="text-secondary text-base font-medium">
+                Parolni unutdingizmi?
               </Text>
             </TouchableOpacity>
             <TouchableOpacity onPress={() => router.push("/sign-up")}>
-              <Text className="text-blue-600 text-base font-medium">
-                Sign Up
+              <Text className="text-primary text-base font-medium">
+                Ro‘yxatdan o‘tish
               </Text>
             </TouchableOpacity>
           </View>

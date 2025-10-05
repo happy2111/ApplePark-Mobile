@@ -1,6 +1,7 @@
 import { makeAutoObservable, runInAction } from "mobx";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import api from "@/api/axios"; // твой axios instance
+import api from "@/api/axios";
+import {Alert} from "react-native"; // твой axios instance
 
 class AuthStore {
   user: any = null;
@@ -13,6 +14,22 @@ class AuthStore {
 
   get isAuth() {
     return !!this.token && !!this.user;
+  }
+
+  async init() {
+    try {
+      const [user, token] = await Promise.all([
+        AsyncStorage.getItem("user"),
+        AsyncStorage.getItem("token"),
+      ]);
+
+      runInAction(() => {
+        this.user = user ? JSON.parse(user) : null;
+        this.token = token || null;
+      });
+    } catch (e) {
+      console.error("Ошибка при инициализации AuthStore:", e);
+    }
   }
 
   // 🟢 Регистрация
@@ -28,7 +45,7 @@ class AuthStore {
   }) {
     this.loading = true;
     try {
-      const { data } = await api.post("/auth/register", payload);
+      const { data } = await api.post("/auth/register", {...payload, isStore: true});
 
       runInAction(() => {
         this.user = data.user;
@@ -79,6 +96,7 @@ class AuthStore {
       });
       await AsyncStorage.setItem("token", data.token);
     } catch (err) {
+      Alert.alert("Error", err?.message<unknown> );
       console.error("Ошибка обновления токена:", err);
       this.logout();
     }
